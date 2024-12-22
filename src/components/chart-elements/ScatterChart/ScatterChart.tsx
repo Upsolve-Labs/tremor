@@ -205,7 +205,6 @@ const ScatterChart = React.forwardRef<HTMLDivElement, ScatterChartProps>((props,
   const categories = constructCategories(data, category);
   const categoryColors = constructCategoryColors(categories, colors);
 
-
   //maybe rename getYAxisDomain to getAxisDomain
   const xAxisDomain = getYAxisDomain(autoMinXValue, minXValue, maxXValue);
   const yAxisDomain = getYAxisDomain(autoMinYValue, minYValue, maxYValue);

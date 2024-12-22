@@ -81,6 +81,9 @@ const AreaChart = React.forwardRef<HTMLDivElement, AreaChartProps>((props, ref) 
     enableLegendSlider = false,
     customTooltip,
     rotateLabelX,
+    padding = (!showXAxis && !showYAxis) || (startEndOnly && !showYAxis)
+      ? { left: 0, right: 0 }
+      : { left: 20, right: 20 },
     tickGap = 5,
     dataLabelOptions,
     orientations,
@@ -89,7 +92,6 @@ const AreaChart = React.forwardRef<HTMLDivElement, AreaChartProps>((props, ref) 
     ...other
   } = props;
   const CustomTooltip = customTooltip;
-  const paddingValue = (!showXAxis && !showYAxis) || (startEndOnly && !showYAxis) ? 0 : 20;
   const [legendHeight, setLegendHeight] = useState(60);
   const [activeDot, setActiveDot] = useState<ActiveDot | undefined>(undefined);
   const [activeLegend, setActiveLegend] = useState<string | undefined>(undefined);
@@ -179,7 +181,7 @@ const AreaChart = React.forwardRef<HTMLDivElement, AreaChartProps>((props, ref) 
               />
             ) : null}
             <XAxis
-              padding={{ left: paddingValue, right: paddingValue }}
+              padding={padding}
               hide={!showXAxis}
               dataKey={index}
               tick={{ transform: "translate(0, 6)" }}
@@ -331,6 +333,7 @@ const AreaChart = React.forwardRef<HTMLDivElement, AreaChartProps>((props, ref) 
               />
             ) : null}
             {categories.map((category) => {
+              const gradientId = (categoryColors.get(category) ?? BaseColors.Gray).replace("#", "");
               return (
                 <defs key={category}>
                   {showGradient ? (
@@ -341,7 +344,7 @@ const AreaChart = React.forwardRef<HTMLDivElement, AreaChartProps>((props, ref) 
                           colorPalette.text,
                         ).textColor
                       }
-                      id={categoryColors.get(category)}
+                      id={gradientId}
                       x1="0"
                       y1="0"
                       x2="0"
@@ -364,7 +367,7 @@ const AreaChart = React.forwardRef<HTMLDivElement, AreaChartProps>((props, ref) 
                           colorPalette.text,
                         ).textColor
                       }
-                      id={categoryColors.get(category)}
+                      id={gradientId}
                       x1="0"
                       y1="0"
                       x2="0"
@@ -381,68 +384,22 @@ const AreaChart = React.forwardRef<HTMLDivElement, AreaChartProps>((props, ref) 
                 </defs>
               );
             })}
-            {categories.map((category, idx) => (
-              <Area
-                className={
-                  getColorClassNames(
-                    categoryColors.get(category) ?? BaseColors.Gray,
-                    colorPalette.text,
-                  ).strokeColor
-                }
-                strokeOpacity={activeDot || (activeLegend && activeLegend !== category) ? 0.3 : 1}
-                activeDot={(props: any) => {
-                  const { cx, cy, stroke, strokeLinecap, strokeLinejoin, strokeWidth, dataKey } =
-                    props;
-                  return (
-                    <Dot
-                      className={tremorTwMerge(
-                        "stroke-tremor-background dark:stroke-dark-tremor-background",
-                        onValueChange ? "cursor-pointer" : "",
-                        getColorClassNames(
-                          categoryColors.get(dataKey) ?? BaseColors.Gray,
-                          colorPalette.text,
-                        ).fillColor,
-                      )}
-                      cx={cx}
-                      cy={cy}
-                      r={5}
-                      fill=""
-                      stroke={stroke}
-                      strokeLinecap={strokeLinecap}
-                      strokeLinejoin={strokeLinejoin}
-                      strokeWidth={strokeWidth}
-                      onClick={(dotProps: any, event) => onDotClick(props, event)}
-                    />
-                  );
-                }}
-                dot={(props: any) => {
-                  const {
-                    stroke,
-                    strokeLinecap,
-                    strokeLinejoin,
-                    strokeWidth,
-                    cx,
-                    cy,
-                    dataKey,
-                    index,
-                  } = props;
-
-                  if (
-                    (hasOnlyOneValueForThisKey(data, category) &&
-                      !(activeDot || (activeLegend && activeLegend !== category))) ||
-                    (activeDot?.index === index && activeDot?.dataKey === category)
-                  ) {
+            {categories.map((category) => {
+              const gradientId = (categoryColors.get(category) ?? BaseColors.Gray).replace("#", "");
+              return (
+                <Area
+                  className={
+                    getColorClassNames(
+                      categoryColors.get(category) ?? BaseColors.Gray,
+                      colorPalette.text,
+                    ).strokeColor
+                  }
+                  strokeOpacity={activeDot || (activeLegend && activeLegend !== category) ? 0.3 : 1}
+                  activeDot={(props: any) => {
+                    const { cx, cy, stroke, strokeLinecap, strokeLinejoin, strokeWidth, dataKey } =
+                      props;
                     return (
                       <Dot
-                        key={index}
-                        cx={cx}
-                        cy={cy}
-                        r={5}
-                        stroke={stroke}
-                        fill=""
-                        strokeLinecap={strokeLinecap}
-                        strokeLinejoin={strokeLinejoin}
-                        strokeWidth={strokeWidth}
                         className={tremorTwMerge(
                           "stroke-tremor-background dark:stroke-dark-tremor-background",
                           onValueChange ? "cursor-pointer" : "",
@@ -451,43 +408,91 @@ const AreaChart = React.forwardRef<HTMLDivElement, AreaChartProps>((props, ref) 
                             colorPalette.text,
                           ).fillColor,
                         )}
+                        cx={cx}
+                        cy={cy}
+                        r={5}
+                        fill=""
+                        stroke={stroke}
+                        strokeLinecap={strokeLinecap}
+                        strokeLinejoin={strokeLinejoin}
+                        strokeWidth={strokeWidth}
+                        onClick={(dotProps: any, event) => onDotClick(props, event)}
                       />
                     );
+                  }}
+                  dot={(props: any) => {
+                    const {
+                      stroke,
+                      strokeLinecap,
+                      strokeLinejoin,
+                      strokeWidth,
+                      cx,
+                      cy,
+                      dataKey,
+                      index,
+                    } = props;
+
+                    if (
+                      (hasOnlyOneValueForThisKey(data, category) &&
+                        !(activeDot || (activeLegend && activeLegend !== category))) ||
+                      (activeDot?.index === index && activeDot?.dataKey === category)
+                    ) {
+                      return (
+                        <Dot
+                          className={tremorTwMerge(
+                            "stroke-tremor-background dark:stroke-dark-tremor-background",
+                            onValueChange ? "cursor-pointer" : "",
+                            getColorClassNames(
+                              categoryColors.get(dataKey) ?? BaseColors.Gray,
+                              colorPalette.text,
+                            ).fillColor,
+                          )}
+                          cx={cx}
+                          cy={cy}
+                          r={5}
+                          fill=""
+                          stroke={stroke}
+                          strokeLinecap={strokeLinecap}
+                          strokeLinejoin={strokeLinejoin}
+                          strokeWidth={strokeWidth}
+                          onClick={(dotProps: any, event) => onDotClick(props, event)}
+                        />
+                      );
+                    }
+                    return <Fragment key={index}></Fragment>;
+                  }}
+                  key={category}
+                  label={
+                    dataLabelOptions?.[category] == null
+                      ? undefined
+                      : {
+                          style: {
+                            fontSize: `${dataLabelOptions?.[category].fontSize ?? 12}px`,
+                            fontWeight: "300",
+                            fill: categoryColors.get(category) ?? BaseColors.Gray,
+                            stroke: "#000",
+                            strokeWidth: 0.3,
+                          },
+                          position: dataLabelOptions[category].position ?? "top",
+                          offset: dataLabelOptions?.[category].offset ?? 10,
+                          angle: dataLabelOptions?.[category].angle ?? 0,
+                        }
                   }
-                  return <Fragment key={index}></Fragment>;
-                }}
-                key={category}
-                label={
-                  dataLabelOptions?.[category] == null
-                    ? undefined
-                    : {
-                        style: {
-                          fontSize: `${dataLabelOptions?.[category].fontSize ?? 12}px`,
-                          fontWeight: "300",
-                          fill: categoryColors.get(category) ?? BaseColors.Gray,
-                          stroke: "#000",
-                          strokeWidth: 0.3,
-                        },
-                        position: dataLabelOptions[category].position ?? "top",
-                        offset: dataLabelOptions?.[category].offset ?? 10,
-                        angle: dataLabelOptions?.[category].angle ?? 0,
-                      }
-                }
-                name={category}
-                type={curveType}
-                dataKey={category}
-                stroke=""
-                fill={`url(#${categoryColors.get(category)})`}
-                strokeWidth={2}
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                isAnimationActive={showAnimation}
-                animationDuration={animationDuration}
-                stackId={stack ? "a" : undefined}
-                connectNulls={connectNulls}
-                yAxisId={orientations ? idx : undefined}
-              />
-            ))}
+                  name={category}
+                  type={curveType}
+                  dataKey={category}
+                  stroke=""
+                  fill={`url(#${gradientId})`}
+                  strokeWidth={2}
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                  isAnimationActive={showAnimation}
+                  animationDuration={animationDuration}
+                  stackId={stack ? "a" : undefined}
+                  connectNulls={connectNulls}
+                />
+              );
+            })}
             {onValueChange
               ? categories.map((category) => (
                   <Line
