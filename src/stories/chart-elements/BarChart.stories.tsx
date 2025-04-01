@@ -396,3 +396,10 @@ export const AxisLabels: Story = {
     yAxisLabel: "Amount (USD)",
   },
 };
+
+export const BarSize: Story = {
+  args: {
+    layout: "vertical",
+    barSize: 40,
+  },
+};
