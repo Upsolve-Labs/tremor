@@ -400,6 +400,7 @@ export const AxisLabels: Story = {
 export const BarSize: Story = {
   args: {
     layout: "vertical",
+    chartHeight: 300,
     barSize: 40,
   },
 };

@@ -150,285 +150,289 @@ const BarChart = React.forwardRef<HTMLDivElement, BarChartProps>((props, ref) =>
   }
   const yAxisDomain = getYAxisDomain(autoMinValue, minValue, maxValue);
 
-  return (
-    <div ref={ref} className={tremorTwMerge("w-full h-80", className)} {...other}>
-      <ResponsiveContainer className="h-full w-full">
-        {data?.length ? (
-          <ReChartsBarChart
-            barCategoryGap={barCategoryGap}
-            barSize={barSize}
-            maxBarSize={1000}
-            data={data}
-            stackOffset={stack ? "sign" : relative ? "expand" : "none"}
-            layout={layout === "vertical" ? "vertical" : "horizontal"}
-            onClick={
-              hasOnValueChange && (activeLegend || activeBar)
-                ? () => {
-                    setActiveBar(undefined);
-                    setActiveLegend(undefined);
-                    onValueChange?.(null);
-                  }
-                : undefined
-            }
-            margin={{
-              bottom: xAxisLabel ? 30 : undefined,
-              left: yAxisLabel ? 20 : undefined,
-              right: yAxisLabel ? 5 : undefined,
-              top: 5,
-            }}
-          >
-            {showGridLines ? (
-              <CartesianGrid
-                className={tremorTwMerge(
-                  // common
-                  "stroke-1",
-                  // light
-                  "stroke-tremor-border",
-                  // dark
-                  "dark:stroke-dark-tremor-border",
-                )}
-                horizontal={layout !== "vertical"}
-                vertical={layout === "vertical"}
-              />
-            ) : null}
+  const contentHeight = React.useMemo(() => {
+    if (!barSize) return undefined;
+    const baseHeight = data.length * Number(barSize);
+    const legendSpace = showLegend ? legendHeight : 0;
+    const axisSpace = 40;
+    return baseHeight + legendSpace + axisSpace;
+  }, [data.length, barSize, showLegend, legendHeight]);
 
-            {layout !== "vertical" ? (
-              <XAxis
-                padding={{ left: paddingValue, right: paddingValue }}
-                hide={!showXAxis}
-                dataKey={index}
-                interval={startEndOnly ? "preserveStartEnd" : intervalType}
-                tick={{ transform: "translate(0, 6)" }}
-                ticks={startEndOnly ? [data[0][index], data[data.length - 1][index]] : undefined}
-                fill=""
-                stroke={showXAxisLine ? "gray" : ""}
-                strokeOpacity={0.2}
-                className={tremorTwMerge(
-                  // common
-                  "mt-4 text-tremor-label",
-                  // light
-                  "fill-tremor-content",
-                  // dark
-                  "dark:fill-dark-tremor-content",
-                )}
-                tickLine={false}
-                axisLine={showXAxis && showXAxisLine}
-                angle={rotateLabelX?.angle}
-                dy={rotateLabelX?.verticalShift}
-                height={rotateLabelX?.xAxisHeight}
-                minTickGap={tickGap}
-              >
-                {xAxisLabel && (
-                  <Label
-                    position="insideBottom"
-                    offset={-20}
-                    className="fill-tremor-content-emphasis text-tremor-default font-medium dark:fill-dark-tremor-content-emphasis"
-                  >
-                    {xAxisLabel}
-                  </Label>
-                )}
-              </XAxis>
-            ) : (
-              <XAxis
-                hide={!showXAxis}
-                type="number"
-                tick={{ transform: "translate(-3, 0)" }}
-                domain={yAxisDomain as AxisDomain}
-                fill=""
-                stroke={showXAxisLine ? "gray" : ""}
-                strokeOpacity={0.2}
-                className={tremorTwMerge(
-                  // common
-                  "text-tremor-label",
-                  // light
-                  "fill-tremor-content",
-                  // dark
-                  "dark:fill-dark-tremor-content",
-                )}
-                tickLine={false}
-                axisLine={showXAxis && showXAxisLine}
-                tickFormatter={valueFormatter}
-                minTickGap={tickGap}
-                allowDecimals={allowDecimals}
-                angle={rotateLabelX?.angle}
-                dy={rotateLabelX?.verticalShift}
-                height={rotateLabelX?.xAxisHeight}
-              >
-                {xAxisLabel && (
-                  <Label
-                    position="insideBottom"
-                    offset={-20}
-                    className="fill-tremor-content-emphasis text-tremor-default font-medium dark:fill-dark-tremor-content-emphasis"
-                  >
-                    {xAxisLabel}
-                  </Label>
-                )}
-              </XAxis>
-            )}
-            {layout !== "vertical" ? (
-              <YAxis
-                width={yAxisWidth}
-                hide={!showYAxis}
-                axisLine={showYAxis && showYAxisLine}
-                tickLine={false}
-                type="number"
-                domain={yAxisDomain as AxisDomain}
-                tick={{ transform: "translate(-3, 0)" }}
-                fill=""
-                stroke={showYAxisLine ? "gray" : ""}
-                strokeOpacity={0.2}
-                className={tremorTwMerge(
-                  // common
-                  "text-tremor-label",
-                  // light
-                  "fill-tremor-content",
-                  // dark
-                  "dark:fill-dark-tremor-content",
-                )}
-                tickFormatter={
-                  relative ? (value: number) => `${(value * 100).toString()} %` : valueFormatter
-                }
-                allowDecimals={allowDecimals}
-              >
-                {yAxisLabel && (
-                  <Label
-                    position="insideLeft"
-                    style={{ textAnchor: "middle" }}
-                    angle={-90}
-                    offset={-15}
-                    className="fill-tremor-content-emphasis text-tremor-default font-medium dark:fill-dark-tremor-content-emphasis"
-                  >
-                    {yAxisLabel}
-                  </Label>
-                )}
-              </YAxis>
-            ) : (
-              <YAxis
-                width={yAxisWidth}
-                hide={!showYAxis}
-                dataKey={index}
-                axisLine={showYAxis && showYAxisLine}
-                tickLine={false}
-                ticks={startEndOnly ? [data[0][index], data[data.length - 1][index]] : undefined}
-                type="category"
-                interval="preserveStartEnd"
-                tick={{ transform: "translate(0, 6)" }}
-                fill=""
-                stroke={showYAxisLine ? "gray" : ""}
-                strokeOpacity={0.2}
-                className={tremorTwMerge(
-                  // common
-                  "text-tremor-label",
-                  // light
-                  "fill-tremor-content",
-                  // dark
-                  "dark:fill-dark-tremor-content",
-                )}
-              >
-                {yAxisLabel && (
-                  <Label
-                    position="insideLeft"
-                    style={{ textAnchor: "middle" }}
-                    angle={-90}
-                    offset={-15}
-                    className="fill-tremor-content-emphasis text-tremor-default font-medium dark:fill-dark-tremor-content-emphasis"
-                  >
-                    {yAxisLabel}
-                  </Label>
-                )}
-              </YAxis>
-            )}
-            <Tooltip
-              wrapperStyle={{ outline: "none" }}
-              isAnimationActive={false}
-              cursor={{ fill: "#d1d5db", opacity: "0.15" }}
-              content={
-                showTooltip ? (
-                  ({ active, payload, label }) =>
-                    CustomTooltip ? (
-                      <CustomTooltip
-                        payload={payload?.map((payloadItem: any) => ({
-                          ...payloadItem,
-                          color: categoryColors.get(payloadItem.dataKey) ?? BaseColors.Gray,
-                        }))}
-                        active={active}
-                        label={label}
-                      />
-                    ) : (
-                      <ChartTooltip
-                        active={active}
-                        payload={payload}
-                        label={label}
-                        valueFormatter={valueFormatter}
-                        categoryColors={categoryColors}
-                      />
-                    )
-                ) : (
-                  <></>
-                )
+  return (
+    <div
+      ref={ref}
+      className={tremorTwMerge(barSize ? "w-full h-80 overflow-y-auto" : "w-full h-80", className)}
+      {...other}
+    >
+      <div
+        style={{
+          height: barSize ? contentHeight : "100%",
+          minWidth: "100%",
+        }}
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          {data?.length ? (
+            <ReChartsBarChart
+              barCategoryGap={barCategoryGap}
+              barSize={barSize}
+              maxBarSize={1000}
+              data={data}
+              stackOffset={stack ? "sign" : relative ? "expand" : "none"}
+              layout={layout === "vertical" ? "vertical" : "horizontal"}
+              onClick={
+                hasOnValueChange && (activeLegend || activeBar)
+                  ? () => {
+                      setActiveBar(undefined);
+                      setActiveLegend(undefined);
+                      onValueChange?.(null);
+                    }
+                  : undefined
               }
-              position={{ y: 0 }}
-            />
-            {showLegend ? (
-              <Legend
-                verticalAlign="top"
-                height={legendHeight}
-                content={({ payload }) =>
-                  ChartLegend(
-                    { payload },
-                    categoryColors,
-                    setLegendHeight,
-                    activeLegend,
-                    hasOnValueChange
-                      ? (clickedLegendItem: string) => onCategoryClick(clickedLegendItem)
-                      : undefined,
-                    enableLegendSlider,
+              margin={{
+                bottom: xAxisLabel ? 30 : undefined,
+                left: yAxisLabel ? 20 : undefined,
+                right: yAxisLabel ? 5 : undefined,
+                top: 5,
+              }}
+            >
+              {showGridLines ? (
+                <CartesianGrid
+                  className={tremorTwMerge(
+                    "stroke-1",
+                    "stroke-tremor-border",
+                    "dark:stroke-dark-tremor-border",
+                  )}
+                  horizontal={layout !== "vertical"}
+                  vertical={layout === "vertical"}
+                />
+              ) : null}
+
+              {layout !== "vertical" ? (
+                <XAxis
+                  padding={{ left: paddingValue, right: paddingValue }}
+                  hide={!showXAxis}
+                  dataKey={index}
+                  interval={startEndOnly ? "preserveStartEnd" : intervalType}
+                  tick={{ transform: "translate(0, 6)" }}
+                  ticks={startEndOnly ? [data[0][index], data[data.length - 1][index]] : undefined}
+                  fill=""
+                  stroke={showXAxisLine ? "gray" : ""}
+                  strokeOpacity={0.2}
+                  className={tremorTwMerge(
+                    "mt-4 text-tremor-label",
+                    "fill-tremor-content",
+                    "dark:fill-dark-tremor-content",
+                  )}
+                  tickLine={false}
+                  axisLine={showXAxis && showXAxisLine}
+                  angle={rotateLabelX?.angle}
+                  dy={rotateLabelX?.verticalShift}
+                  height={rotateLabelX?.xAxisHeight}
+                  minTickGap={tickGap}
+                >
+                  {xAxisLabel && (
+                    <Label
+                      position="insideBottom"
+                      offset={-20}
+                      className="fill-tremor-content-emphasis text-tremor-default font-medium dark:fill-dark-tremor-content-emphasis"
+                    >
+                      {xAxisLabel}
+                    </Label>
+                  )}
+                </XAxis>
+              ) : (
+                <XAxis
+                  hide={!showXAxis}
+                  type="number"
+                  tick={{ transform: "translate(-3, 0)" }}
+                  domain={yAxisDomain as AxisDomain}
+                  fill=""
+                  stroke={showXAxisLine ? "gray" : ""}
+                  strokeOpacity={0.2}
+                  className={tremorTwMerge(
+                    "text-tremor-label",
+                    "fill-tremor-content",
+                    "dark:fill-dark-tremor-content",
+                  )}
+                  tickLine={false}
+                  axisLine={showXAxis && showXAxisLine}
+                  tickFormatter={valueFormatter}
+                  minTickGap={tickGap}
+                  allowDecimals={allowDecimals}
+                  angle={rotateLabelX?.angle}
+                  dy={rotateLabelX?.verticalShift}
+                  height={rotateLabelX?.xAxisHeight}
+                >
+                  {xAxisLabel && (
+                    <Label
+                      position="insideBottom"
+                      offset={-20}
+                      className="fill-tremor-content-emphasis text-tremor-default font-medium dark:fill-dark-tremor-content-emphasis"
+                    >
+                      {xAxisLabel}
+                    </Label>
+                  )}
+                </XAxis>
+              )}
+              {layout !== "vertical" ? (
+                <YAxis
+                  width={yAxisWidth}
+                  hide={!showYAxis}
+                  axisLine={showYAxis && showYAxisLine}
+                  tickLine={false}
+                  type="number"
+                  domain={yAxisDomain as AxisDomain}
+                  tick={{ transform: "translate(-3, 0)" }}
+                  fill=""
+                  stroke={showYAxisLine ? "gray" : ""}
+                  strokeOpacity={0.2}
+                  className={tremorTwMerge(
+                    "text-tremor-label",
+                    "fill-tremor-content",
+                    "dark:fill-dark-tremor-content",
+                  )}
+                  tickFormatter={
+                    relative ? (value: number) => `${(value * 100).toString()} %` : valueFormatter
+                  }
+                  allowDecimals={allowDecimals}
+                >
+                  {yAxisLabel && (
+                    <Label
+                      position="insideLeft"
+                      style={{ textAnchor: "middle" }}
+                      angle={-90}
+                      offset={-15}
+                      className="fill-tremor-content-emphasis text-tremor-default font-medium dark:fill-dark-tremor-content-emphasis"
+                    >
+                      {yAxisLabel}
+                    </Label>
+                  )}
+                </YAxis>
+              ) : (
+                <YAxis
+                  width={yAxisWidth}
+                  hide={!showYAxis}
+                  dataKey={index}
+                  axisLine={showYAxis && showYAxisLine}
+                  tickLine={false}
+                  ticks={startEndOnly ? [data[0][index], data[data.length - 1][index]] : undefined}
+                  type="category"
+                  interval="preserveStartEnd"
+                  tick={{ transform: "translate(0, 6)" }}
+                  fill=""
+                  stroke={showYAxisLine ? "gray" : ""}
+                  strokeOpacity={0.2}
+                  className={tremorTwMerge(
+                    "text-tremor-label",
+                    "fill-tremor-content",
+                    "dark:fill-dark-tremor-content",
+                  )}
+                >
+                  {yAxisLabel && (
+                    <Label
+                      position="insideLeft"
+                      style={{ textAnchor: "middle" }}
+                      angle={-90}
+                      offset={-15}
+                      className="fill-tremor-content-emphasis text-tremor-default font-medium dark:fill-dark-tremor-content-emphasis"
+                    >
+                      {yAxisLabel}
+                    </Label>
+                  )}
+                </YAxis>
+              )}
+              <Tooltip
+                wrapperStyle={{ outline: "none" }}
+                isAnimationActive={false}
+                cursor={{ fill: "#d1d5db", opacity: "0.15" }}
+                content={
+                  showTooltip ? (
+                    ({ active, payload, label }) =>
+                      CustomTooltip ? (
+                        <CustomTooltip
+                          payload={payload?.map((payloadItem: any) => ({
+                            ...payloadItem,
+                            color: categoryColors.get(payloadItem.dataKey) ?? BaseColors.Gray,
+                          }))}
+                          active={active}
+                          label={label}
+                        />
+                      ) : (
+                        <ChartTooltip
+                          active={active}
+                          payload={payload}
+                          label={label}
+                          valueFormatter={valueFormatter}
+                          categoryColors={categoryColors}
+                        />
+                      )
+                  ) : (
+                    <></>
                   )
                 }
+                position={{ y: 0 }}
               />
-            ) : null}
-            {categories.map((category) => (
-              <Bar
-                className={tremorTwMerge(
-                  getColorClassNames(
-                    categoryColors.get(category) ?? BaseColors.Gray,
-                    colorPalette.background,
-                  ).fillColor,
-                  onValueChange ? "cursor-pointer" : "",
-                )}
-                key={category}
-                name={category}
-                type="linear"
-                stackId={stack || relative ? "a" : undefined}
-                dataKey={category}
-                fill=""
-                label={
-                  dataLabelOptions?.[category] == null
-                    ? undefined
-                    : {
-                        style: {
-                          fontSize: `${dataLabelOptions?.[category].fontSize ?? 12}px`,
-                          fontWeight: "300",
-                          fill: categoryColors.get(category) ?? BaseColors.Gray,
-                          stroke: "#000",
-                          strokeWidth: 0.3,
-                        },
-                        position: dataLabelOptions[category].position ?? "top",
-                        offset: dataLabelOptions?.[category].offset ?? 10,
-                        angle: dataLabelOptions?.[category].angle ?? 0,
-                      }
-                }
-                isAnimationActive={showAnimation}
-                animationDuration={animationDuration}
-                shape={(props: any) => renderShape(props, activeBar, activeLegend, layout)}
-                onClick={onBarClick}
-              />
-            ))}
-          </ReChartsBarChart>
-        ) : (
-          <NoData noDataText={noDataText} />
-        )}
-      </ResponsiveContainer>
+              {showLegend ? (
+                <Legend
+                  verticalAlign="top"
+                  height={legendHeight}
+                  content={({ payload }) =>
+                    ChartLegend(
+                      { payload },
+                      categoryColors,
+                      setLegendHeight,
+                      activeLegend,
+                      hasOnValueChange
+                        ? (clickedLegendItem: string) => onCategoryClick(clickedLegendItem)
+                        : undefined,
+                      enableLegendSlider,
+                    )
+                  }
+                />
+              ) : null}
+              {categories.map((category) => (
+                <Bar
+                  className={tremorTwMerge(
+                    getColorClassNames(
+                      categoryColors.get(category) ?? BaseColors.Gray,
+                      colorPalette.background,
+                    ).fillColor,
+                    onValueChange ? "cursor-pointer" : "",
+                  )}
+                  key={category}
+                  name={category}
+                  type="linear"
+                  stackId={stack || relative ? "a" : undefined}
+                  dataKey={category}
+                  fill=""
+                  label={
+                    dataLabelOptions?.[category] == null
+                      ? undefined
+                      : {
+                          style: {
+                            fontSize: `${dataLabelOptions?.[category].fontSize ?? 12}px`,
+                            fontWeight: "300",
+                            fill: categoryColors.get(category) ?? BaseColors.Gray,
+                            stroke: "#000",
+                            strokeWidth: 0.3,
+                          },
+                          position: dataLabelOptions[category].position ?? "top",
+                          offset: dataLabelOptions?.[category].offset ?? 10,
+                          angle: dataLabelOptions?.[category].angle ?? 0,
+                        }
+                  }
+                  isAnimationActive={showAnimation}
+                  animationDuration={animationDuration}
+                  shape={(props: any) => renderShape(props, activeBar, activeLegend, layout)}
+                  onClick={onBarClick}
+                />
+              ))}
+            </ReChartsBarChart>
+          ) : (
+            <NoData noDataText={noDataText} />
+          )}
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 });
