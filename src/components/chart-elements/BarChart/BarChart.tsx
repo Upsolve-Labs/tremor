@@ -62,6 +62,7 @@ export interface BarChartProps extends BaseChartProps {
   stack?: boolean;
   relative?: boolean;
   barCategoryGap?: string | number;
+  barSize?: string | number;
 }
 
 const BarChart = React.forwardRef<HTMLDivElement, BarChartProps>((props, ref) => {
@@ -96,6 +97,7 @@ const BarChart = React.forwardRef<HTMLDivElement, BarChartProps>((props, ref) =>
     customTooltip,
     rotateLabelX,
     barCategoryGap,
+    barSize,
     tickGap = 5,
     dataLabelOptions,
     xAxisLabel,
@@ -154,6 +156,8 @@ const BarChart = React.forwardRef<HTMLDivElement, BarChartProps>((props, ref) =>
         {data?.length ? (
           <ReChartsBarChart
             barCategoryGap={barCategoryGap}
+            barSize={barSize}
+            maxBarSize={1000}
             data={data}
             stackOffset={stack ? "sign" : relative ? "expand" : "none"}
             layout={layout === "vertical" ? "vertical" : "horizontal"}

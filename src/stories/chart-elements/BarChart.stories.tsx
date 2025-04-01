@@ -16,7 +16,7 @@ import {
 const meta: Meta<typeof BarChart> = {
   title: "Visualizations/Chart/BarChart",
   component: BarChart,
-  args: { categories: ["Sales", "Successful Payments"], index: "month", data, className: "h-72" },
+  args: { categories: ["Sales", "Successful Payments"], index: "month", data, className: "h-32" },
   parameters: {
     sourceLink:
       "https://github.com/tremorlabs/tremor/tree/main/src/components/chart-elements/BarChart",
@@ -394,5 +394,12 @@ export const AxisLabels: Story = {
   args: {
     xAxisLabel: "Month of Year",
     yAxisLabel: "Amount (USD)",
+  },
+};
+
+export const BarSize: Story = {
+  args: {
+    layout: "vertical",
+    barSize: 40,
   },
 };
